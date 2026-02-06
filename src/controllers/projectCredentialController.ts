@@ -108,6 +108,20 @@ export const revealCredentialPassword = asyncHandler(async (req: Request, res: R
     throw new AppError('Accès refusé à ce projet', 403);
   }
 
+  // Vérifier que l'utilisateur a le droit de révéler les mots de passe
+  // Les VIEWER ne peuvent PAS révéler les mots de passe
+  if (userRole !== 'OWNER' && userRole !== 'ADMIN') {
+    const member = await prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: { projectId, userId },
+      },
+    });
+
+    if (!member || member.role === 'VIEWER') {
+      throw new AppError('Seuls les propriétaires et membres peuvent révéler les mots de passe', 403);
+    }
+  }
+
   // Récupérer le credential
   const credential = await prisma.projectCredential.findFirst({
     where: {
