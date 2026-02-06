@@ -41,8 +41,10 @@ model User {
   updatedAt    DateTime  @updatedAt
   
   // Relations
-  refreshTokens RefreshToken[]
-  activityLogs  ActivityLog[]
+  refreshTokens    RefreshToken[]
+  activityLogs     ActivityLog[]
+  projectsCreated  Project[]        @relation("ProjectCreator")
+  projectMemberships ProjectMember[]
   
   @@map("users")
 }
@@ -111,4 +113,101 @@ model Settings {
   updatedAt             DateTime @updatedAt
   
   @@map("settings")
+}
+
+// ============================================================================
+// PHASE 2: PROJECTS MANAGEMENT
+// ============================================================================
+
+enum ProjectStatus {
+  ACTIVE      // Projet actif
+  PAUSED      // En pause
+  ARCHIVED    // Archivé
+  COMPLETED   // Terminé
+}
+
+enum ProjectMemberRole {
+  OWNER       // Propriétaire du projet
+  MEMBER      // Membre avec accès complet
+  VIEWER      // Lecture seule
+}
+
+enum CredentialType {
+  FTP
+  DATABASE
+  ADMIN
+  API
+  SSH
+  OTHER
+}
+
+model Project {
+  id          String         @id @default(uuid())
+  name        String
+  description String?        @db.Text
+  status      ProjectStatus  @default(ACTIVE)
+  
+  // URLs
+  prodUrl     String?        @map("prod_url")
+  betaUrl     String?        @map("beta_url")
+  repoUrl     String?        @map("repo_url")
+  
+  // Dates
+  startDate   DateTime?      @map("start_date")
+  endDate     DateTime?      @map("end_date")
+  
+  // Créateur
+  createdById String         @map("created_by_id")
+  createdBy   User           @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  // Relations
+  members     ProjectMember[]
+  credentials ProjectCredential[]
+  
+  @@index([status])
+  @@index([createdById])
+  @@map("projects")
+}
+
+model ProjectMember {
+  projectId  String             @map("project_id")
+  project    Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  userId     String             @map("user_id")
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role       ProjectMemberRole  @default(MEMBER)
+  joinedAt   DateTime           @default(now())
+  
+  @@id([projectId, userId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+model ProjectCredential {
+  id        String         @id @default(uuid())
+  projectId String         @map("project_id")
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  type      CredentialType @default(OTHER)
+  name      String         // Ex: "Production FTP", "Admin Panel"
+  username  String?
+  
+  // Chiffrement AES-256-GCM
+  passwordEncrypted String  @db.Text @map("password_encrypted")
+  encryptionSalt    String  @map("encryption_salt")
+  encryptionIv      String  @map("encryption_iv")
+  encryptionTag     String  @map("encryption_tag")
+  
+  url       String?        @db.Text
+  notes     String?        @db.Text
+  
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  
+  @@index([projectId])
+  @@map("project_credentials")
 }

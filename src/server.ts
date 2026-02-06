@@ -13,6 +13,7 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import roleRoutes from './routes/roleRoutes';
 import settingsRoutes from './routes/settingsRoutes';
+import projectRoutes from './routes/projectRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
@@ -97,6 +98,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Route de bienvenue
 app.get('/', (req: Request, res: Response) => {
@@ -133,7 +135,7 @@ async function startServer() {
     // Démarrer le serveur
     app.listen(PORT, () => {
       logger.info('╔═══════════════════════════════════════════════════════════╗');
-      logger.info(`║   ProjectManager Backend - Phase 1                        ║`);
+      logger.info(`║   ProjectManager Backend - Phase 2                        ║`);
       logger.info('╚═══════════════════════════════════════════════════════════╝');
       logger.info(`✓ Serveur démarré sur le port ${PORT}`);
       logger.info(`✓ Environnement: ${NODE_ENV}`);
@@ -159,6 +161,20 @@ async function startServer() {
       logger.info('         DELETE /api/roles/:id');
       logger.info('  Settings: GET  /api/settings');
       logger.info('            PUT  /api/settings');
+      logger.info('  Projects: GET    /api/projects');
+      logger.info('            POST   /api/projects');
+      logger.info('            GET    /api/projects/:id');
+      logger.info('            PUT    /api/projects/:id');
+      logger.info('            DELETE /api/projects/:id');
+      logger.info('  Members:  GET    /api/projects/:id/members');
+      logger.info('            POST   /api/projects/:id/members');
+      logger.info('            PUT    /api/projects/:id/members/:userId');
+      logger.info('            DELETE /api/projects/:id/members/:userId');
+      logger.info('  Creds:    GET    /api/projects/:id/credentials');
+      logger.info('            POST   /api/projects/:id/credentials');
+      logger.info('            GET    /api/projects/:id/credentials/:credId/reveal');
+      logger.info('            PUT    /api/projects/:id/credentials/:credId');
+      logger.info('            DELETE /api/projects/:id/credentials/:credId');
       logger.info('═══════════════════════════════════════════════════════════');
     });
   } catch (error) {
