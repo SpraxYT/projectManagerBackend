@@ -1,0 +1,100 @@
+// ProjectManager - Prisma Schema
+// Phase 1: Authentication & Roles
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// PHASE 1: AUTHENTICATION & ROLES
+// ============================================================================
+
+enum UserRole {
+  OWNER    // Premier utilisateur, accès total
+  ADMIN    // Administrateur avec permissions étendues
+  MANAGER  // Manager avec permissions modérées
+  MEMBER   // Membre standard
+  CUSTOM   // Rôle personnalisé
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(MEMBER)
+  
+  // Relation avec rôle personnalisé (si CUSTOM)
+  customRoleId String?      @map("custom_role_id")
+  customRole   CustomRole?  @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
+  
+  // Metadata
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  // Relations
+  refreshTokens RefreshToken[]
+  activityLogs  ActivityLog[]
+  
+  @@map("users")
+}
+
+model CustomRole {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?  @db.Text
+  color       String?  // Couleur hex pour l'UI (#3B82F6)
+  
+  // Permissions (stockées en JSON pour flexibilité)
+  permissions Json     @default("{}")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  
+  @@map("custom_roles")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.Text
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  action    String   // LOGIN, LOGOUT, CREATE_USER, UPDATE_ROLE, etc.
+  entity    String?  // Type d'entité affectée (User, Role, etc.)
+  entityId  String?  @map("entity_id")
+  metadata  Json?    // Données additionnelles
+  
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @db.Text @map("user_agent")
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
