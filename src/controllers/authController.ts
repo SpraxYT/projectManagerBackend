@@ -45,6 +45,15 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   // Vérifier si c'est le premier utilisateur (sera OWNER)
   const userCount = await prisma.user.count();
+  
+  // Si ce n'est pas le premier utilisateur, vérifier si l'inscription est autorisée
+  if (userCount > 0) {
+    const settings = await prisma.settings.findFirst();
+    if (settings && !settings.enableRegistration) {
+      throw new AppError('Les inscriptions sont actuellement désactivées', 403);
+    }
+  }
+  
   const role: UserRole = userCount === 0 ? 'OWNER' : 'MEMBER';
 
   // Hasher le mot de passe
