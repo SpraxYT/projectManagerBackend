@@ -60,6 +60,33 @@ async function getNextPosition(columnId: string): Promise<number> {
   return lastTask ? lastTask.position + 1 : 0;
 }
 
+async function getOrCreateBoard(projectId: string) {
+  let board = await prisma.board.findFirst({
+    where: { projectId },
+  });
+
+  if (!board) {
+    // Créer le board avec les colonnes par défaut
+    board = await prisma.board.create({
+      data: {
+        projectId,
+        name: 'Kanban Board',
+        position: 0,
+        columns: {
+          create: [
+            { name: 'À faire', position: 0, color: '#6B7280' },
+            { name: 'En cours', position: 1, color: '#3B82F6' },
+            { name: 'En révision', position: 2, color: '#F59E0B' },
+            { name: 'Terminé', position: 3, color: '#10B981' },
+          ],
+        },
+      },
+    });
+  }
+
+  return board;
+}
+
 // ============================================================================
 // CONTROLLERS
 // ============================================================================
@@ -76,9 +103,12 @@ export const getAllTasks = async (req: Request, res: Response) => {
     // Vérifier l'accès au projet
     await checkProjectAccess(userId, projectId);
 
-    // Récupérer le board et ses colonnes avec toutes les tâches
-    const board = await prisma.board.findFirst({
-      where: { projectId },
+    // Obtenir ou créer le board
+    const boardData = await getOrCreateBoard(projectId);
+
+    // Récupérer le board complet avec colonnes et tâches
+    const board = await prisma.board.findUnique({
+      where: { id: boardData.id },
       include: {
         columns: {
           orderBy: { position: 'asc' },
@@ -117,10 +147,6 @@ export const getAllTasks = async (req: Request, res: Response) => {
         },
       },
     });
-
-    if (!board) {
-      return res.status(404).json({ error: 'Board non trouvé' });
-    }
 
     res.json({ board });
   } catch (error: any) {
