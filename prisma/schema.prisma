@@ -41,10 +41,12 @@ model User {
   updatedAt    DateTime  @updatedAt
   
   // Relations
-  refreshTokens    RefreshToken[]
-  activityLogs     ActivityLog[]
-  projectsCreated  Project[]        @relation("ProjectCreator")
+  refreshTokens      RefreshToken[]
+  activityLogs       ActivityLog[]
+  projectsCreated    Project[]        @relation("ProjectCreator")
   projectMemberships ProjectMember[]
+  taskAssignments    TaskAssignment[]
+  taskComments       TaskComment[]
   
   @@map("users")
 }
@@ -166,6 +168,8 @@ model Project {
   // Relations
   members     ProjectMember[]
   credentials ProjectCredential[]
+  boards      Board[]
+  labels      Label[]
   
   @@index([status])
   @@index([createdById])
@@ -210,4 +214,164 @@ model ProjectCredential {
   
   @@index([projectId])
   @@map("project_credentials")
+}
+
+// ============================================================================
+// PHASE 3: KANBAN & TASK MANAGEMENT
+// ============================================================================
+
+model Board {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  name      String   @default("Kanban Board")
+  position  Int      @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  columns   Column[]
+  
+  @@index([projectId])
+  @@map("boards")
+}
+
+model Column {
+  id      String @id @default(uuid())
+  boardId String @map("board_id")
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  
+  name     String
+  position Int
+  color    String @default("#6B7280") // Couleur hex pour l'UI
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  tasks     Task[]
+  
+  @@index([boardId])
+  @@map("columns")
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String        @id @default(uuid())
+  columnId    String        @map("column_id")
+  column      Column        @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?       @db.Text
+  position    Int
+  priority    TaskPriority  @default(MEDIUM)
+  
+  dueDate     DateTime?     @map("due_date")
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  // Relations
+  assignments TaskAssignment[]
+  labels      TaskLabel[]
+  subtasks    Subtask[]
+  comments    TaskComment[]
+  
+  @@index([columnId])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+model TaskAssignment {
+  taskId     String   @map("task_id")
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  assignedAt DateTime @default(now())
+  
+  @@id([taskId, userId])
+  @@index([userId])
+  @@map("task_assignments")
+}
+
+enum LabelType {
+  PRIORITY
+  STATUS
+  CUSTOM
+}
+
+model Label {
+  id        String    @id @default(uuid())
+  projectId String    @map("project_id")
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  name      String
+  icon      String?   // Emoji ou icon name
+  color     String    // Couleur hex
+  type      LabelType @default(CUSTOM)
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relations
+  tasks     TaskLabel[]
+  
+  @@index([projectId])
+  @@map("labels")
+}
+
+model TaskLabel {
+  taskId  String @map("task_id")
+  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  labelId String @map("label_id")
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  
+  @@id([taskId, labelId])
+  @@index([labelId])
+  @@map("task_labels")
+}
+
+model Subtask {
+  id          String   @id @default(uuid())
+  taskId      String   @map("task_id")
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  title       String
+  isCompleted Boolean  @default(false) @map("is_completed")
+  position    Int
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([taskId])
+  @@map("subtasks")
+}
+
+model TaskComment {
+  id        String   @id @default(uuid())
+  taskId    String   @map("task_id")
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  content   String   @db.Text
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_comments")
 }

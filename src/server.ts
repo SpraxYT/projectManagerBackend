@@ -14,6 +14,7 @@ import userRoutes from './routes/userRoutes';
 import roleRoutes from './routes/roleRoutes';
 import settingsRoutes from './routes/settingsRoutes';
 import projectRoutes from './routes/projectRoutes';
+import kanbanRoutes from './routes/kanbanRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
@@ -99,6 +100,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api', kanbanRoutes); // Phase 3: Kanban & Tasks
 
 // Route de bienvenue
 app.get('/', (req: Request, res: Response) => {
@@ -135,7 +137,7 @@ async function startServer() {
     // Démarrer le serveur
     app.listen(PORT, () => {
       logger.info('╔═══════════════════════════════════════════════════════════╗');
-      logger.info(`║   ProjectManager Backend - Phase 2                        ║`);
+      logger.info(`║   ProjectManager Backend - Phase 3 (Kanban)              ║`);
       logger.info('╚═══════════════════════════════════════════════════════════╝');
       logger.info(`✓ Serveur démarré sur le port ${PORT}`);
       logger.info(`✓ Environnement: ${NODE_ENV}`);
@@ -175,6 +177,20 @@ async function startServer() {
       logger.info('            GET    /api/projects/:id/credentials/:credId/reveal');
       logger.info('            PUT    /api/projects/:id/credentials/:credId');
       logger.info('            DELETE /api/projects/:id/credentials/:credId');
+      logger.info('  Kanban:   GET    /api/projects/:id/board');
+      logger.info('            POST   /api/projects/:id/board/columns');
+      logger.info('            GET    /api/projects/:id/tasks');
+      logger.info('  Tasks:    GET    /api/tasks/:id');
+      logger.info('            POST   /api/columns/:id/tasks');
+      logger.info('            PATCH  /api/tasks/:id');
+      logger.info('            PATCH  /api/tasks/:id/move (drag & drop)');
+      logger.info('            DELETE /api/tasks/:id');
+      logger.info('  Labels:   GET    /api/projects/:id/labels');
+      logger.info('            POST   /api/projects/:id/labels');
+      logger.info('  Subtasks: GET    /api/tasks/:id/subtasks');
+      logger.info('            POST   /api/tasks/:id/subtasks');
+      logger.info('  Comments: GET    /api/tasks/:id/comments');
+      logger.info('            POST   /api/tasks/:id/comments');
       logger.info('═══════════════════════════════════════════════════════════');
     });
   } catch (error) {
