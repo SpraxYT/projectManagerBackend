@@ -67,7 +67,7 @@ model CustomRole {
 
 model RefreshToken {
   id        String   @id @default(uuid())
-  token     String   @unique @db.Text
+  token     String   @unique @db.VarChar(1000)
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
