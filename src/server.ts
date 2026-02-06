@@ -12,6 +12,7 @@ import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import roleRoutes from './routes/roleRoutes';
+import settingsRoutes from './routes/settingsRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
@@ -95,6 +96,7 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Route de bienvenue
 app.get('/', (req: Request, res: Response) => {
@@ -146,6 +148,7 @@ async function startServer() {
       logger.info('         POST /api/auth/logout');
       logger.info('         GET  /api/auth/me');
       logger.info('  Users: GET    /api/users');
+      logger.info('         POST   /api/users');
       logger.info('         GET    /api/users/:id');
       logger.info('         PUT    /api/users/:id');
       logger.info('         DELETE /api/users/:id');
@@ -154,6 +157,8 @@ async function startServer() {
       logger.info('         GET    /api/roles/:id');
       logger.info('         PUT    /api/roles/:id');
       logger.info('         DELETE /api/roles/:id');
+      logger.info('  Settings: GET  /api/settings');
+      logger.info('            PUT  /api/settings');
       logger.info('═══════════════════════════════════════════════════════════');
     });
   } catch (error) {
