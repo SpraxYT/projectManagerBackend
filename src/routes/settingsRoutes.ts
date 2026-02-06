@@ -6,13 +6,10 @@ import { authenticate, requireRole } from '../middleware/auth';
 
 const router = Router();
 
-// Toutes les routes nécessitent l'authentification
-router.use(authenticate);
-
 /**
  * GET /api/settings
  * Récupérer les paramètres de l'instance
- * Accessible par tous les utilisateurs authentifiés
+ * Accessible publiquement (pour vérifier si l'inscription est activée)
  */
 router.get('/', settingsController.getSettings);
 
@@ -21,6 +18,6 @@ router.get('/', settingsController.getSettings);
  * Mettre à jour les paramètres de l'instance
  * Uniquement OWNER et ADMIN
  */
-router.put('/', requireRole('OWNER', 'ADMIN'), settingsController.updateSettings);
+router.put('/', authenticate, requireRole('OWNER', 'ADMIN'), settingsController.updateSettings);
 
 export default router;
