@@ -48,7 +48,7 @@ git clone https://github.com/SpraxYT/projectManagerFront.git frontend
 
 ```bash
 cd backend
-npm install --production
+npm install
 ```
 
 **Créer le fichier .env** (copiez tout d'un coup):
@@ -103,7 +103,7 @@ npm run build
 
 ```bash
 cd /home/lpp.aymcode.fr/private/frontend
-npm install --production
+npm install
 ```
 
 **Créer .env.local:**

@@ -99,7 +99,7 @@ git clone https://github.com/SpraxYT/projectManagerFront.git frontend
 cd backend
 
 # Installer les dépendances
-npm install --production
+npm install
 
 # Créer le fichier .env
 cat > .env << 'EOF'
@@ -155,7 +155,7 @@ npm run build
 cd /home/lpp.aymcode.fr/private/frontend
 
 # Installer les dépendances
-npm install --production
+npm install
 
 # Créer le fichier .env.local
 cat > .env.local << 'EOF'
@@ -306,7 +306,7 @@ git clone https://github.com/SpraxYT/projectManagerFront.git frontend
 
 # Backend
 cd backend
-npm install --production
+npm install
 
 # Créer .env avec PORT=4006 (port suivant disponible)
 cat > .env << 'EOF'
@@ -334,7 +334,7 @@ npm run build
 
 # Frontend
 cd ../frontend
-npm install --production
+npm install
 
 cat > .env.local << 'EOF'
 NEXT_PUBLIC_API_URL=https://client2.aymcode.fr/api
@@ -418,7 +418,7 @@ pm2 monit
 # Backend
 cd /home/lpp.aymcode.fr/private/backend
 git pull
-npm install --production
+npm install
 npx prisma generate
 npx prisma migrate deploy
 npm run build
@@ -427,7 +427,7 @@ pm2 restart pm-backend-lpp
 # Frontend
 cd /home/lpp.aymcode.fr/private/frontend
 git pull
-npm install --production
+npm install
 npm run build
 pm2 restart pm-frontend-lpp
 ```

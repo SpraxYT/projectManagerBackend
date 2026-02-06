@@ -77,7 +77,7 @@ echo -e "${GREEN}[3/9] Configuration du backend...${NC}"
 cd "$BACKEND_DIR"
 
 # Installation des dépendances
-npm install --production
+npm install
 
 # Création du fichier .env
 cat > .env << EOF
@@ -131,7 +131,7 @@ echo -e "${GREEN}[6/9] Configuration du frontend...${NC}"
 cd "$FRONTEND_DIR"
 
 # Installation des dépendances
-npm install --production
+npm install
 
 # Création du fichier .env.local
 cat > .env.local << EOF

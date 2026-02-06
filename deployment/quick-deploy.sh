@@ -34,7 +34,7 @@ cd $BASE_DIR
 
 # Backend
 cd backend
-npm install --production
+npm install
 
 JWT_SECRET=$(openssl rand -hex 32)
 JWT_REFRESH=$(openssl rand -hex 32)
@@ -61,7 +61,7 @@ npm run build
 
 # Frontend
 cd ../frontend
-npm install --production
+npm install
 
 cat > .env.local << EOF
 NEXT_PUBLIC_API_URL=https://$DOMAIN/api
