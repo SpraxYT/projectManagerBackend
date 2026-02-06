@@ -9,7 +9,83 @@ import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
+/**
+ * Créer un nouvel utilisateur
+ */
+export const createUser = asyncHandler(async (req: Request, res: Response) => {
+  const data = createUserSchema.parse(req.body);
+
+  // Hasher le mot de passe
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  // Créer l'utilisateur
+  const user = await prisma.user.create({
+    data: {
+      email: data.email,
+      password: hashedPassword,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      customRoleId: data.role === 'CUSTOM' ? data.customRoleId : null,
+    },
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      customRoleId: true,
+      customRole: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+        },
+      },
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  // Logger l'activité
+  if (req.user) {
+    await prisma.activityLog.create({
+      data: {
+        userId: req.user.id,
+        action: 'CREATE_USER',
+        entity: 'User',
+        entityId: user.id,
+        metadata: { email: user.email, role: user.role },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      },
+    });
+  }
+
+  logger.info(`Nouvel utilisateur créé: ${user.email} par ${req.user?.email}`);
+
+  res.status(201).json({
+    message: 'Utilisateur créé',
+    user,
+  });
+});
+
 // Schémas de validation
+const createUserSchema = z.object({
+  email: z.string().email('Email invalide'),
+  password: z
+    .string()
+    .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
+    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
+    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
+    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
+  firstName: z.string().min(1, 'Le prénom est requis'),
+  lastName: z.string().min(1, 'Le nom est requis'),
+  role: z.enum(['OWNER', 'ADMIN', 'MANAGER', 'MEMBER', 'CUSTOM']).default('MEMBER'),
+  customRoleId: z.string().uuid().optional().nullable(),
+});
+
 const updateUserSchema = z.object({
   email: z.string().email('Email invalide').optional(),
   firstName: z.string().min(1).optional(),

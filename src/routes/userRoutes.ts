@@ -17,6 +17,13 @@ router.use(authenticate);
 router.get('/', requirePermission('canViewUsers'), userController.getAllUsers);
 
 /**
+ * POST /api/users
+ * Créer un nouvel utilisateur
+ * Permission: canCreateUsers
+ */
+router.post('/', requirePermission('canCreateUsers'), userController.createUser);
+
+/**
  * GET /api/users/:id
  * Récupérer un utilisateur par ID
  * Permission: canViewUsers OU accès à ses propres données
