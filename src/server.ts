@@ -15,6 +15,7 @@ import roleRoutes from './routes/roleRoutes';
 import settingsRoutes from './routes/settingsRoutes';
 import projectRoutes from './routes/projectRoutes';
 import kanbanRoutes from './routes/kanbanRoutes';
+import templateRoutes from './routes/templateRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 
@@ -101,6 +102,7 @@ app.use('/api/roles', roleRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api', kanbanRoutes); // Phase 3: Kanban & Tasks
+app.use('/api', templateRoutes); // Templates de tâches
 
 // Route de bienvenue
 app.get('/', (req: Request, res: Response) => {
