@@ -24,9 +24,9 @@
     "noImplicitThis": false,
     "alwaysStrict": false,
     "noFallthroughCasesInSwitch": false,
-    "suppressImplicitAnyIndexErrors": true,
     "allowUnreachableCode": true,
-    "allowUnusedLabels": true
+    "allowUnusedLabels": true,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
