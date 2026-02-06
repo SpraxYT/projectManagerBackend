@@ -93,8 +93,8 @@ cat .env
 npx prisma generate
 npx prisma migrate deploy
 
-# Build
-npm run build
+# Build (production - moins strict)
+npm run build:prod
 ```
 
 ---

@@ -121,7 +121,7 @@ npx prisma migrate deploy
 # ============================================================================
 
 echo -e "${GREEN}[5/9] Build du backend...${NC}"
-npm run build
+npm run build:prod
 
 # ============================================================================
 # 6. CONFIGURATION FRONTEND

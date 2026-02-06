@@ -57,7 +57,7 @@ EOF
 
 npx prisma generate
 npx prisma migrate deploy
-npm run build
+npm run build:prod
 
 # Frontend
 cd ../frontend

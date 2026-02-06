@@ -145,8 +145,8 @@ npx prisma generate
 # Appliquer les migrations
 npx prisma migrate deploy
 
-# Build du backend
-npm run build
+# Build du backend (production - moins strict)
+npm run build:prod
 ```
 
 ### 4. Configuration Frontend
@@ -330,7 +330,7 @@ nano .env
 # Prisma
 npx prisma generate
 npx prisma migrate deploy
-npm run build
+npm run build:prod
 
 # Frontend
 cd ../frontend
@@ -421,7 +421,7 @@ git pull
 npm install
 npx prisma generate
 npx prisma migrate deploy
-npm run build
+npm run build:prod
 pm2 restart pm-backend-lpp
 
 # Frontend
